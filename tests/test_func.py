@@ -154,6 +154,7 @@ config = {
     "pluginTypeTitle": "mapper",
 }
 def test_config():
-    #resp = requests.get(f"{appliance}/config")
+    resp = requests.get(f"{appliance}/config")
     #print(resp.content)
+    assert resp.json() == config
     return True
