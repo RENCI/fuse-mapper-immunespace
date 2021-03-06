@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/RENCI/fuse-mapper-immunescape.svg?branch=master)](https://travis-ci.com/RENCI/fuse-mapper-immunescape)
+[![AppVeyor](https://img.shields.io/docker/cloud/build/txscience/fuse-mapper-immunespace?style=plastic)](https://hub.docker.com/repository/docker/txscience/fuse-mapper-immunescape/builds)
 
 # fuse-mapper-immunescape
 
