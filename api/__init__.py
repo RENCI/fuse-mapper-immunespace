@@ -1,7 +1,6 @@
 import os
 import logging
 from pathlib import Path
-from tx.parallex import start_python
 from tx.functional.maybe import Just, Nothing
 from tx.functional.either import Left
 from tx.functional.utils import identity
@@ -9,7 +8,6 @@ from pathvalidate import validate_filename
 from tx.requests.utils import get
 import yappi
 import json
-import jsonpickle
 
 yappi.set_clock_type(os.environ.get("CLOCK_TYPE", "wall"))
 
@@ -88,85 +86,23 @@ def jsonify(obj):
 output_dir = os.environ.get("OUTPUT_DIR")
 
 def mappingClinicalFromData(body):
-    config = get_default_config(get_config())
-    settingsRequested = body.get("settingsRequested", {})
-    settingsDefault = config.get("settingsDefault", {})
-    modelParameters = settingsRequested.get("modelParameters", [])
-    modelParametersDefault = settingsDefault.get("modelParameters", [])
-    patientVariables = settingsRequested.get("patientVariables", settingsRequested.get("patientVariables", []))
+    if "settingsRequested" not in body:
+        body["settingsRequested"] = config['settingsDefaults']
+    patient_ids = body["patientIds"]
+    timestamp = body["timestamp"]
 
-    specName = getModelParameter(modelParameters, "specName", identity, lambda: getModelParameter(modelParametersDefault, "specName", identity, lambda: "spec.py"))
-    logger.info(f"specName = {specName}")
-    validate_filename(specName)
-    
-    pythonLibrary = getModelParameter(modelParameters, "libraryPath", identity, lambda: getModelParameter(modelParametersDefault, "libraryPath", identity, lambda: []))
-
-    logger.info(f"pythonLibrary = {pythonLibrary}")
-    for p in pythonLibrary:
-        validate_filename(p)
-
-    outputPath = getModelParameter(modelParameters, "outputPath", identity, lambda: getModelParameter(modelParametersDefault, "outputPath", identity, lambda: None))
-    if outputPath is not None:
-        validate_filename(outputPath)
-
-    nthreads = getModelParameter(modelParameters, "nthreads", int, lambda: getModelParameter(modelParametersDefault, "nthreads", int, lambda: 3))
-    logger.info(f"nthreads = {nthreads}")
-
-    level = getModelParameter(modelParameters, "level", int, lambda: getModelParameter(modelParametersDefault, "level", int, lambda: 0))
-    logger.info(f"level = {level}")
-    additional_arguments = getModelParameter(modelParameters, "args", identity, lambda: getModelParameter(modelParametersDefault, "args", identity, lambda: {}))
-    logger.info(f"additional_arguments = {additional_arguments}")
-    
-    spec_path = Path(__file__).parent.parent / "config" / specName
-    lib_path = list(map(lambda p: str(Path(__file__).parent.parent / "config" / p), pythonLibrary))
-    logger.info(f"spec_path = {spec_path}")
-    logger.info(f"lib_path = {lib_path}")
-    
-    output_file = None if outputPath is None else os.path.join(output_dir, outputPath)
-    logger.info(f"output_path = {output_file}")
-    
-    with open(spec_path) as f:
-        spec = f.read()
-
-    logger.info(f"spec = {spec}")
-
-    profile = os.environ.get("PROFILE")
-    if profile is not None:
-        yappi.start()
-
-    res = start_python(nthreads, py = spec, data = {
-        "patientIds": body["patientIds"],
-        "patientVariables": patientVariables,
-        "timestamp": body["timestamp"],
-        "data": body["data"],
-        **additional_arguments
-    }, output_path = output_file, system_paths = lib_path, validate_spec = False, level=level, object_store=None)
-
-    if profile is not None:
-        yappi.stop()
-
-        stats = yappi.get_func_stats()
-        stats.sort("tsub")
-        stats.print_all()
-
-    def proc_res(res, ret):
-        for k,v in res.items():
-            indices = [] if k == "" else k.split(".")
-            ret = assign(ret, list(map(lambda index: int(index) if index.isdigit() else index, indices)), v.value)
-        return ret
-
-    ret = None
-    if outputPath is None:
-        ret = proc_res(res, ret)
-    else:
-        with open(output_file) as o:
-            for line in o:
-                ret = proc_res(jsonpickle.decode(line), ret)
-        with open(output_file, "w") as o2:
-            json.dump(jsonify(ret), o2)
-        ret = None
-    return jsonify(ret)
-        
+    ret_response = []
+    for i, patient_id in enumerate(patient_ids):
+        val = pdsphenotypemapping.dispatcher.lookupClinicalsFromData(patient_id, i, timestamp, body)
+        if isinstance(val, tuple):
+            # mapping failed since a (error_message, status_code) tuple is returned
+            return val
+        else:
+            ret_response.append({
+                "patientId": patient_id,
+                "values": val
+            })
+    return ret_response
 
 def get_default_config(default):
 
@@ -190,12 +126,201 @@ def get_default_config(default):
         }
 
 
+config = {
+    "pluginDependencies": ["pdspi-fhir-example"],
+    "title": "tx-parallex variable mapper",
+    "pluginType": "m",
+    "pluginTypeTitle": "Mapping",
+    "pluginSelectors": [],
+    "settingsDefaults": {
+        "pluginSelectors": [],
+        "patientVariables": [
+            {
+                "id": "LOINC:2160-0",
+                "legalValues": {
+                    "type": "number"
+                },
+                "title": "Serum creatinine"
+            },
+            {
+                "id": "LOINC:82810-3",
+                "legalValues": {
+                    "type": "boolean"
+                },
+                "title": "Pregnancy"
+            },
+            {
+                "id": "HP:0001892",
+                "legalValues": {
+                    "type": "boolean"
+                },
+                "title": "Bleeding"
+            },
+            {
+                "id": "HP:0000077",
+                "legalValues": {
+                    "type": "boolean"
+                },
+                "title": "Kidney dysfunction"
+            },
+            {
+                "id": "LOINC:45701-0",
+                "legalValues": {
+                    "type": "boolean"
+                },
+                "title": "Fever"
+            },
+            {
+                "id": "LOINC:LP212175-6",
+                "legalValues": {
+                    "type": "string"
+                },
+                "title": "Date of fever onset"
+            },
+            {
+                "id": "LOINC:64145-6",
+                "legalValues": {
+                    "type": "boolean"
+                },
+                "title": "Cough"
+            },
+            {
+                "id": "LOINC:85932-2",
+                "legalValues": {
+                    "type": "string"
+                },
+                "title": "Date of cough onset"
+            },
+            {
+                "id": "LOINC:54564-0",
+                "legalValues": {
+                    "type": "boolean"
+                },
+                "title": "Shortness of breath"
+            },
+            {
+                "id": "LOINC:LP172921-1",
+                "legalValues": {
+                    "type": "boolean"
+                },
+                "title": "Cardiovascular disease"
+            },
+            {
+                "id": "LOINC:54542-6",
+                "legalValues": {
+                    "type": "boolean"
+                },
+                "title": "Pulmonary disease"
+            },
+            {
+                "id": "LOINC:LP128504-0",
+                "legalValues": {
+                    "type": "boolean"
+                },
+                "title": "Autoimmune disease"
+            },
+            {
+                "id": "LOINC:LP21258-6",
+                "legalValues": {
+                    "type": "number"
+                },
+                "title": "Oxygen saturation"
+            },
+            {
+                "id": "LOINC:30525-0",
+                "legalValues": {
+                    "type": "integer"
+                },
+                "title": "Age"
+            },
+            {
+                "id": "LOINC:54134-2",
+                "legalValues": {
+                    "type": "string"
+                },
+                "title": "Race"
+            },
+            {
+                "id": "LOINC:54120-1",
+                "legalValues": {
+                    "type": "string"
+                },
+                "title": "Ethnicity"
+            },
+            {
+                "id": "LOINC:21840-4",
+                "legalValues": {
+                    "type": "string"
+                },
+                "title": "Sex"
+            },
+            {
+                "id": "LOINC:8302-2",
+                "legalValues": {
+                    "type": "number"
+                },
+                "title": "Height"
+            },
+            {
+                "id": "LOINC:29463-7",
+                "legalValues": {
+                    "type": "number"
+                },
+                "title": "Weight"
+            },
+            {
+                "id": "LOINC:56799-0",
+                "legalValues": {
+                    "type": "string"
+                },
+                "title": "Address"
+            },
+            {
+                "id": "LOINC:39156-5",
+                "legalValues": {
+                    "type": "number"
+                },
+                "title": "BMI"
+            }
+        ],
+        "modelParameters": [
+            {
+                "id": "nthreads",
+                "title": "number of threads",
+                "legalValues": {"type": "integer"},
+                "parameterValue": {
+                    "value": 3
+                }
+            }, {
+                "id": "level",
+                "title": "nested for paralleization level",
+                "legalValues": {"type": "integer"},
+                "parameterValue": {
+                    "value": 0
+                }
+            }, {
+                "id": "specName",
+                "title": "spec name",
+                "legalValues": {"type": "string"},
+                "parameterValue": {
+                    "value": "spec.py"
+                }
+            }, {
+                "id": "libraryPath",
+                "title": "Python load module path",
+                "legalValues": {"type": "string"},
+                "parameterValue": {
+                    "value": None
+                }
+            }
+        ]
+    }
+}
+
+config = {
+    "title": "FUSE immunespace mapper data provider",
+    "pluginType": "m",
+    "pluginTypeTitle": "mapper",
+}
 def get_config():
-    spec_path = Path(__file__).parent.parent / "config" / "config.py"
-    
-    with open(spec_path) as f:
-        spec = f.read()
-
-    res = start_python(1, py=spec, data={}, output_path=None, system_paths=[], validate_spec=False, level=0, object_store=None)
-
-    return res[""].value
+    return config
