@@ -148,42 +148,12 @@ def test_api_passthrough():
     assert result.status_code == 200
     assert result.json() ==  {"key" : "a" }
 
-config = {
-    "pluginDependencies": ["fuse-mapper-immunespace"],
-    "title": "Gene expression variable mapper (Immunespace)",
-    "pluginType": "m",
-    "pluginTypeTitle": "Mapping",
-    "pluginSelectors": [],
-    "settingsDefaults": {
-        "pluginSelectors": [],
-        "aliquotVariables": [
-            {
-                "id": "FUSE:system",
-                "title": "Gene ID encoding systme",
-                "description": "Gene ID encoding system used for returned gene IDs",
-                "type": "string",
-                "enum": ["entrez","ensemble","hgnc"],
-                "default": "entrez"
-            },
-            {
-                "id": "FUSE:geneListType",
-                "title": "Type of gene list requested",
-                "description": "Type of gene list provided by user, 'all'=return all genes, 'intersection'=return only genes represented in all observed aliquots, 'specific'=only return genes on the optional 'FUSE:geneList'",
-                "type": "string",
-                "enum": ["all","intersection","specific"],
-                "default": "all"
-            },
-            {
-                "id": "FUSE:geneList",
-                "title": "List of gene IDs to return",
-                "description": "List of gene IDs requested, ignored if 'FUSE:geneListType'!='specific'; list uses ID encoding system specified by 'FUSE:system'.",
-                "type": "array",
-                "default": [],
-            }
-        ]
-    }
-}
 def test_config():
+    # config_path = Path(__file__).parent.parent / "config.json"
+    config_path = Path(__file__).parent / "config.json"
+    with open(config_path) as f:
+        config=json.load(f)
+
     resp = requests.get(f"{appliance}/config")
     #print(resp.content)
     assert resp.json() == config
