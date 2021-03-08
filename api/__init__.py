@@ -127,200 +127,40 @@ def get_default_config(default):
 
 
 config = {
-    "pluginDependencies": ["pdspi-fhir-example"],
-    "title": "tx-parallex variable mapper",
+    "pluginDependencies": ["fuse-mapper-immunespace"],
+    "title": "Gene expression variable mapper (Immunespace)",
     "pluginType": "m",
     "pluginTypeTitle": "Mapping",
     "pluginSelectors": [],
     "settingsDefaults": {
         "pluginSelectors": [],
-        "patientVariables": [
+        "aliquotVariables": [
             {
-                "id": "LOINC:2160-0",
-                "legalValues": {
-                    "type": "number"
-                },
-                "title": "Serum creatinine"
+                "id": "FUSE:system",
+                "title": "Gene ID encoding systme",
+                "description": "Gene ID encoding system used for returned gene IDs",
+                "type": "string",
+                "enum": ["entrez","ensemble","hgnc"],
+                "default": "entrez"
             },
             {
-                "id": "LOINC:82810-3",
-                "legalValues": {
-                    "type": "boolean"
-                },
-                "title": "Pregnancy"
+                "id": "FUSE:geneListType",
+                "title": "Type of gene list requested",
+                "description": "Type of gene list provided by user, 'all'=return all genes, 'intersection'=return only genes represented in all observed aliquots, 'specific'=only return genes on the optional 'FUSE:geneList'",
+                "type": "string",
+                "enum": ["all","intersection","specific"],
+                "default": "all"
             },
             {
-                "id": "HP:0001892",
-                "legalValues": {
-                    "type": "boolean"
-                },
-                "title": "Bleeding"
-            },
-            {
-                "id": "HP:0000077",
-                "legalValues": {
-                    "type": "boolean"
-                },
-                "title": "Kidney dysfunction"
-            },
-            {
-                "id": "LOINC:45701-0",
-                "legalValues": {
-                    "type": "boolean"
-                },
-                "title": "Fever"
-            },
-            {
-                "id": "LOINC:LP212175-6",
-                "legalValues": {
-                    "type": "string"
-                },
-                "title": "Date of fever onset"
-            },
-            {
-                "id": "LOINC:64145-6",
-                "legalValues": {
-                    "type": "boolean"
-                },
-                "title": "Cough"
-            },
-            {
-                "id": "LOINC:85932-2",
-                "legalValues": {
-                    "type": "string"
-                },
-                "title": "Date of cough onset"
-            },
-            {
-                "id": "LOINC:54564-0",
-                "legalValues": {
-                    "type": "boolean"
-                },
-                "title": "Shortness of breath"
-            },
-            {
-                "id": "LOINC:LP172921-1",
-                "legalValues": {
-                    "type": "boolean"
-                },
-                "title": "Cardiovascular disease"
-            },
-            {
-                "id": "LOINC:54542-6",
-                "legalValues": {
-                    "type": "boolean"
-                },
-                "title": "Pulmonary disease"
-            },
-            {
-                "id": "LOINC:LP128504-0",
-                "legalValues": {
-                    "type": "boolean"
-                },
-                "title": "Autoimmune disease"
-            },
-            {
-                "id": "LOINC:LP21258-6",
-                "legalValues": {
-                    "type": "number"
-                },
-                "title": "Oxygen saturation"
-            },
-            {
-                "id": "LOINC:30525-0",
-                "legalValues": {
-                    "type": "integer"
-                },
-                "title": "Age"
-            },
-            {
-                "id": "LOINC:54134-2",
-                "legalValues": {
-                    "type": "string"
-                },
-                "title": "Race"
-            },
-            {
-                "id": "LOINC:54120-1",
-                "legalValues": {
-                    "type": "string"
-                },
-                "title": "Ethnicity"
-            },
-            {
-                "id": "LOINC:21840-4",
-                "legalValues": {
-                    "type": "string"
-                },
-                "title": "Sex"
-            },
-            {
-                "id": "LOINC:8302-2",
-                "legalValues": {
-                    "type": "number"
-                },
-                "title": "Height"
-            },
-            {
-                "id": "LOINC:29463-7",
-                "legalValues": {
-                    "type": "number"
-                },
-                "title": "Weight"
-            },
-            {
-                "id": "LOINC:56799-0",
-                "legalValues": {
-                    "type": "string"
-                },
-                "title": "Address"
-            },
-            {
-                "id": "LOINC:39156-5",
-                "legalValues": {
-                    "type": "number"
-                },
-                "title": "BMI"
-            }
-        ],
-        "modelParameters": [
-            {
-                "id": "nthreads",
-                "title": "number of threads",
-                "legalValues": {"type": "integer"},
-                "parameterValue": {
-                    "value": 3
-                }
-            }, {
-                "id": "level",
-                "title": "nested for paralleization level",
-                "legalValues": {"type": "integer"},
-                "parameterValue": {
-                    "value": 0
-                }
-            }, {
-                "id": "specName",
-                "title": "spec name",
-                "legalValues": {"type": "string"},
-                "parameterValue": {
-                    "value": "spec.py"
-                }
-            }, {
-                "id": "libraryPath",
-                "title": "Python load module path",
-                "legalValues": {"type": "string"},
-                "parameterValue": {
-                    "value": None
-                }
+                "id": "FUSE:geneList",
+                "title": "List of gene IDs to return",
+                "description": "List of gene IDs requested, ignored if 'FUSE:geneListType'!='specific'; list uses ID encoding system specified by 'FUSE:system'.",
+                "type": "array",
+                "default": [],
             }
         ]
     }
 }
 
-config = {
-    "title": "FUSE immunespace mapper data provider",
-    "pluginType": "m",
-    "pluginTypeTitle": "mapper",
-}
 def get_config():
     return config
