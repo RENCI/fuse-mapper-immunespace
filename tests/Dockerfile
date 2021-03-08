@@ -1,17 +1,18 @@
 FROM python:3.8-buster
 
-RUN mkdir /test
-WORKDIR /test
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
 
-RUN pip3 install --no-cache-dir pytest requests pyyaml python-dateutil==2.8.1 tx-functional>=0.0.16 pint
+COPY requirements.txt requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
 
-COPY config.json    /test
-COPY tx-utils/src /test
-COPY api          /test/api
+COPY config.json  /usr/src/app
+COPY tx-utils/src /usr/src/app
+COPY api          /usr/src/app/api
 
-COPY tests/test_*.py /test/
+COPY tests/test_*.py /usr/src/app/
 
-ENV PYTHONPATH=/test
-
+# testing-specfic:
+RUN pip3 install --no-cache-dir pytest requests
 ENTRYPOINT ["pytest"]
 CMD ["-s"]
