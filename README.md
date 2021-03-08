@@ -2,8 +2,25 @@
 
 # fuse-mapper-immunescape
 
-## prerequisites
- python 3.8 or higher
+## prerequisites:
+* python 3.8 or higher
+* Docker 20.10 or higher
+* docker-compose v1.28 and 3.8 in the yml
+* cargo 1.49.0 or higher (for installing dockerfile-plus)
+
+Install dockerfile-plus:
+`cargo build`
+
+Tips for updating docker-compose on Centos:
+
+```
+sudo yum install jq
+VERSION=$(curl --silent https://api.github.com/repos/docker/compose/releases/latest | jq .name -r)
+sudo mv /usr/local/bin/docker-compose /usr/local/bin/docker-compose.old-version
+DESTINATION=/usr/local/bin/docker-compose
+sudo curl -L https://github.com/docker/compose/releases/download/${VERSION}/docker-compose-$(uname -s)-$(uname -m) -o $DESTINATION
+sudo chmod 755 $DESTINATION
+```
 
 ## configuration
 
@@ -29,6 +46,4 @@ WARNING: This only works because `config/config.py` hardcodes the config. Please
 
 ## TO DO:
 
-* Fix config/config.py (see above)
-* re-brand this for FUSE immunespace, it's currently using cdm for PDS parallex
 * create fuse-cdm-specs
