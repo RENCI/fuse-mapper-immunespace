@@ -162,5 +162,10 @@ config = {
     }
 }
 
+
+import json
 def get_config():
-    return config
+    config_path = Path(__file__).parent.parent / "config.json"
+    with open(config_path) as f:
+        return json.load(f)
+        
