@@ -33,7 +33,7 @@ sudo chmod 755 $DESTINATION
 
 Don't change these:
 * __DOCKER_BUILDKIT__ required for dockerfile-plus (INCLUDE+ instruction)
-* COMPOSE_DOCKER_CLI_BUILD required for dockerfile-plus (INCLUDE+ instruction)
+* __COMPOSE_DOCKER_CLI_BUILD__ required for dockerfile-plus (INCLUDE+ instruction)
 
 
 ## start
