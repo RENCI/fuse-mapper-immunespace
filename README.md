@@ -2,14 +2,15 @@
 
 # fuse-mapper-immunescape
 
+Maps the input gene expression to the requested format. Also returns certainty of the computed value (certitude); e.g., if a gene doesn't map, a default value will be set and the certitude will be set to 0 (uncertain); 2 (certain) otherwise).
+
+Can be run as a stand-alone appliance (see `up.sh` below) or as a plugin to a FUSE deployment (e.g., (fuse-immcellfie)[http://github/RENCI/fuse-immcellfie]).
+
 ## prerequisites:
 * python 3.8 or higher
 * Docker 20.10 or higher
 * docker-compose v1.28 and 3.8 in the yml
 * cargo 1.49.0 or higher (for installing dockerfile-plus)
-
-Install dockerfile-plus:
-`cargo build`
 
 Tips for updating docker-compose on Centos:
 
@@ -24,9 +25,16 @@ sudo chmod 755 $DESTINATION
 
 ## configuration
 
-edit `tests/docker.env`
+1. Install dockerfile-plus:
+`cargo build`
 
-Put your spec under `config`. Put your custom python functions under a sub dir in that dir. Any python module under the sub dir can be imported in your spec. Your spec should output the format that the api specifies.
+2. Copy `sample.env` to `.env` and edit to suit your server:
+* __API_PORT__ pick a unique port to avoid the `up.sh` and `./tests/test.sh` commands from colliding with other installations on the same server
+
+Don't change these:
+* __DOCKER_BUILDKIT__ required for dockerfile-plus (INCLUDE+ instruction)
+* COMPOSE_DOCKER_CLI_BUILD required for dockerfile-plus (INCLUDE+ instruction)
+
 
 ## start
 ```
@@ -46,4 +54,5 @@ WARNING: This only works because `config/config.py` hardcodes the config. Please
 
 ## TO DO:
 
+* implement /mapping endpoint
 * create fuse-cdm-specs

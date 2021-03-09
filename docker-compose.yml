@@ -13,13 +13,3 @@ services:
       - $API_PORT:8080
     volumes:
       - ./config:/usr/src/app/config
-      - $SHARED_DIR:/shared
-
-networks:                      
-  default:                     
-    driver: bridge             
-    ipam:                      
-      driver: default          
-      config:                  
-        - subnet: ${SUBNET}
-    
