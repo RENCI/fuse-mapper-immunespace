@@ -1,22 +1,54 @@
 import requests
-import yaml
 from pathlib import Path
 import logging
-from tempfile import mkdtemp
 import os
 import json
-import shutil
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
+
+appliance="http://fuse-mapper-immunespace:8080"
+# xxx log.info(f"starting on port (${API_PORT})")
 
 json_headers = {
     "Content-Type": "application/json",
     "Accept": "application/json"
 }
 
-input_dir = os.environ.get("INPUT_DIR")
-output_dir = os.environ.get("OUTPUT_DIR")
+def test_config():
+    config_path = Path(__file__).parent / "config.json"
+    with open(config_path) as f:
+        config=json.load(f)
+    resp = requests.get(f"{appliance}/config")
+    assert resp.json() == config
+
+
+json_headers = {
+    "Accept": "application/json"
+}
+
+def test_mapping():
+    test_file="expected/1_mapping.json"
+    expected_path = Path(__file__).parent /  test_file
+    with open(expected_path) as f:
+        expected=json.load(f)
+
+    pv =  {
+        "title": f"subj var title",
+        "legalValues": {
+            "type": "integer"
+        },
+        "why": f"subj var why",
+        "id": "subj var",
+    }
+    q = {"subjectIds":["1"], "timestamp":"2020-07-01T14:29:15.453Z", "data":{"foo":"bar"} }
+    
+    resp = requests.post(f"{appliance}/mapping", headers=json_headers, json=q)
+    print(json.dumps(resp.json(), indent=4))
+    #assert resp.json() == expected
+    return True
+
+# ----NOTES FOLLOW ----
 
 # some nice parameters might include:
 # id_source=entrez/ncbi | hgnc | ensembl 
@@ -27,8 +59,6 @@ output_dir = os.environ.get("OUTPUT_DIR")
 # filter_id=<genelist id on server to use for filter>
 # 
 
-appliance="http://fuse-mapper-immunespace:8080"
-# xxx log.info(f"starting on port (${API_PORT})")
 
 # xxx
 # change this to be per-person:
@@ -116,67 +146,3 @@ examplar_return={
     ]
 }
 
-def query(pid, cv, unit=None, data=None):
-    pv = {
-        "title": f"{cv} title",
-        "legalValues": {
-            "type": "integer"
-        },
-        "why": f"{cv} why",
-        "id": cv,
-    }
-    if unit is None:
-        pv["units"] = unit
-        q = {
-            "subjectIds": [pid],
-            "timestamp" : "2019-10-19T00:00:00Z",
-            "data": data if data is not None else [bundles.get(pid, {"resourceType": "Bundle", "type": "collection"})],
-            "settingsRequested": {"patientVariables": [pv]}
-        }
-    
-    return requests.post(f"{appliance}/mapping", headers=json_headers, json=q), pv
-
-
-# xxx this isn't testing anything right now
-def test_api_passthrough():
-    # result, pvt = query("1000", "LOINC:30525-0")
-    result = requests.models.Response()
-    result._content = b'{ "key" : "a" }'
-    result.status_code = 200
-
-    #print(result.content)
-    assert result.status_code == 200
-    assert result.json() ==  {"key" : "a" }
-
-def test_config():
-    config_path = Path(__file__).parent / "config.json"
-    with open(config_path) as f:
-        config=json.load(f)
-    resp = requests.get(f"{appliance}/config")
-    assert resp.json() == config
-
-
-json_headers = {
-    "Accept": "application/json"
-}
-
-def test_mapping():
-    test_file="expected/1_mapping.json"
-    expected_path = Path(__file__).parent /  test_file
-    with open(expected_path) as f:
-        expected=json.load(f)
-
-    pv =  {
-        "title": f"subj var title",
-        "legalValues": {
-            "type": "integer"
-        },
-        "why": f"subj var why",
-        "id": "subj var",
-    }
-    q = {"patientIds":["1"], "timestamp":"2020-07-01T14:29:15.453Z", "data":{"foo":"bar"} }
-    
-    resp = requests.post(f"{appliance}/mapping", headers=json_headers, json=q)
-    print(json.dumps(resp.json(), indent=4))
-    #assert resp.json() == expected
-    return True

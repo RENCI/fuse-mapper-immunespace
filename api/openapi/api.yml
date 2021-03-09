@@ -35,11 +35,11 @@ paths:
                           "legalValues": { "type": "string", "format": "time-stamp" }
                         }
                       ],
-                      "patientVariables": [
+                      "subjectVariables": [
                         {
                           "id": "LOINC:30525-0",
                           "title": "Age",
-                          "variableDescription": "Fractional age of patient relative to [current-time].",
+                          "variableDescription": "Fractional age of subject relative to [current-time].",
                           "legalValues": { "type": "number", "minimum": "0" },
                         },
                         {
@@ -63,13 +63,13 @@ paths:
                         {
                           "id": "HP:0000077.extant.boolean",
                           "title": "Kidney dysfunction, extant",
-                          "variableDescription": "If true, then Kidney dysfunction was found in the record for the patient, relative to current-time.",
+                          "variableDescription": "If true, then Kidney dysfunction was found in the record for the subject, relative to current-time.",
                           "legalValues": { "type": "boolean" },
                         },
                         {
                           "id": "1114195.extant.count",
                           "title": "Rivoroxaban dosing count",
-                          "variableDescription": "Number of times patient was dosed with Rivoroxaban.",
+                          "variableDescription": "Number of times subject was dosed with Rivoroxaban.",
                           "legalValues": { "type": "number" } 
                         },
                       ]
@@ -117,33 +117,32 @@ paths:
                     $ref: '#/components/schemas/Config'
   /mapping:
     post:
-      summary: map from patient record to clinical feature variables
+      summary: map from common data access protocol to observations
       operationId: api.get_mapping
       parameters: []
       requestBody:
         content:
           application/json:
             schema:
-              description: "Send in array of bundles, one per patient id containing as much data as needed to map the values requested. For example, to provide clinical guidance, the bundle should contain the entire patient record. To provide mappings for a study period, the record will only cover the duration of the study. To create a feature vector for a training set, the duration might be only 24 hours, and the mapper might be called repeatedly for the same patient across multiple days to create a standardized array."
+              description: "Send in array of data"
               type: object
               required:
-                - patientIds
-                - timestamp
+                - subjectIds
                 - data
               properties:
                 txid:
                   type: string
                 timeout:
                   type: integer
-                  description: "Number of milliseconds until time out. Factory system default should be 120000 (2 minutes) for RUO applictions, and only 500ms for clinical."
-                patientIds:
-                  description: "Map these patient ids from the FHIR"
+                  description: "Number of milliseconds until time out. Factory system default should be 120000 (2 minutes)."
+                subjectIds:
+                  description: "Map these subject ids from the digital object server"
                   example: [38]
                   type: array
                   items:
                     type: string
                 data:
-                  description: "An array of FHIR bundles, one per patient id of type 'batch-response'."
+                  description: "An array of digital objects, one per subject id."
                   anyOf:
                     - type: array
                       items:
@@ -165,12 +164,12 @@ paths:
                 items:
                   type: object
                   properties:
-                    patientId:
+                    subjectId:
                       type: string
                     values:
                       type: array
                       items:
-                        $ref: "#/components/schemas/PatientVariable"
+                        $ref: "#/components/schemas/SubjectVariable"
         '400':
           description: "Bad Request"
           content:
@@ -197,7 +196,7 @@ paths:
                       values:
                         type: array
                         items:
-                          $ref: "#/components/schemas/PatientVariable"
+                          $ref: "#/components/schemas/SubjectVariable"
         '500':
           description: "Internal Server Error"
           content:
@@ -212,9 +211,9 @@ paths:
                     example: [  {
                       "timestamp": "2019-09-20T00:00:01Z",
                       "event": "Error mapping [Age] for [fuse-mapper-immunespace].",
-                      "source": "FHIR Bundle",
+                      "source": "subject Bundle",
                       "level": 1,
-                      "action": "Arbitrarily setting age to 35 with certitude 0 (not certain)"
+                      "action": "Arbitrarily setting age to '35-55' with certitude 0 (not certain)"
                       },
                       {
                       "timestamp": "2019-09-20T00:00:01Z",
@@ -232,7 +231,7 @@ paths:
                       values:
                         type: array
                         items:
-                          $ref: "#/components/schemas/PatientVariable"
+                          $ref: "#/components/schemas/SubjectVariable"
 components:
   schemas:
     Message:
@@ -256,7 +255,7 @@ components:
           type: string
           example: >-
             The specified mapper (fuse-mapper-immunespace) is not compatible with
-            the specified FHIR server (pdspi-fhir-hapi).
+            the specified digital object server (fuse-server-gdc).
         source:
           type: string
           example: admin user
@@ -287,8 +286,8 @@ components:
         action:
           type: string
           example: >-
-            Arbitrarily chose this FHIR server from those available:
-            (pdspi-fhir-example). Only one FHIR server is available that is also
+            Arbitrarily chose this digital object server from those available:
+            (fuse-server-immunespace). Only one digital object server is available that is also
             compatible with fuse-mapper-immunespace
     Config:
       type: object
@@ -301,11 +300,11 @@ components:
           description: >-
             A string, unique to this deployment, used to identify this plugin in
             realtime
-          example: pdspi-mapper-DOAC
+          example: fuse-mapper-immunespace
         title:
           type: string
           description: Meaningful name for this plugin
-          example: DOAC variable mapper
+          example: Immunespace subject variable mapper
         enabled:
           type: boolean
           description: >-
@@ -318,38 +317,35 @@ components:
             type: string
             description: >-
               An array of container names upon which the plugin in question
-              depends. For example, 'txscience/pds-fhir-example:0.2.0'. Mapper
-              plugins must indicate a dependency on one or more FHIR plugins,
+              depends. For example, 'txscience/fuse-server-immunespace:0.2.0'. Mapper
+              plugins must indicate a dependency on one or more digital object server plugins,
               but dependencies are discouraged otherwise in order to maintain
               the decoupling and reuse of plugins. Every plugin of type 'm' and
-              'mD' must have at least one 'f' or 'fD' plugin listed in
+              'mD' must have at least one 's' or 'sD' plugin listed in
               pluginDependencies, otherwise return 500.
         pluginType:
           type: string
           enum:
             - g
             - m
-            - f
-            - fD
+            - s
+            - sD
             - mD
           description: >-
             A value identifying the plugin type. 
-            'g'=Guidance, 'c'=Convenience, 'm'=Mapper, 'f'=FHIR, 'mD'= Default Mapper, 'fD'=Default FHIR. In 
-            the clinical arena, only one FHIR server and only one mapper is 
-            allowed, and this can be indicated either with the defaults, or by 
-            only installing one mapper and one FHIR plugin type.
+            'g'=Guidance, 'c'=Convenience, 'm'=Mapper, 's'=Server, 'mD'= Default Mapper, 'sD'=Default digital object server.
           example: m
         pluginTypeTitle:
           type: string
           enum:
             - Guidance
             - Mapper
-            - FHIR
-            - Default FHIR
+            - Server
+            - Default Server
             - Default Mapper
           description: >-
             A human-readable value for the type. 'g'=Guidance, 'c'=Convenience, 
-            'm'=Mapper, 'f'=FHIR, 'mD'=Default Mapper, 'fD'=Default FHIR
+            'm'=Mapper, 's'=Server, 'mD'=Default Mapper, 'sD'=Default Server
         settingsDefaults:
           $ref: '#/components/schemas/Settings'
     Settings:
@@ -362,26 +358,30 @@ components:
         pluginSelectors:
           description: >-
             Maps the piid to a set of selector values. Potentially, a decision tree could be
-            implemented here by prefacing each selectorarray item with logic,
+            implemented here by prefacing each selector array item with logic,
             but for this API version we will instead always AND all the selector
-            array elements. For example, 'if guidance is requried for drug _x_
-            AND indication _y_ then use plugin _z_'.
+            array elements. For example, 'if analysis is requried for organism _x_
+            AND model _y_ then use plugin _z_'.
           type: array
           items:
             $ref: '#/components/schemas/PluginSelector'
           example:
-            - id: dosing.rxCUI
-              title: Drug
+            - id: taxid.NCBI
+              title: Taxonomy Id
               legalValues:
                 type: string
                 enum:
-                  - value: 'rxCUI:1596450'
-                    title: Gentamicin
-                  - value: 'rxCUI:1723160'
-                    title: Amikacin
+                  - value: '9606'
+                    title: Human
+                  - value: '10090'
+                    title: Mouse
+                  - value: '10116'
+                    title: Rat
+                  - value: '10029'
+                    title: Chinese hamster
               selectorValue:
-                value: 'rxCUI:1596450'
-                title: Amikacin
+                value: '9606'
+                title: Human
         modelParameters:
           description: >-
             Default, typed values for any parameters that might be required by
@@ -390,41 +390,36 @@ components:
           items:
             $ref: '#/components/schemas/PluginParameter'
           example:
-            - id: 'pdspi-guidance-example:1'
-              title: Extended interval nomogram
+            - id: 'cellfie:1'
+              title: Thresholding Approach
               parameterDescription: >-
-                This calculator uses one of four extended-interval nomograms.
-                Please choose one nomogram.
+                Select one of two thresholding methods, either global (the threshold is the same for all the genes) or local (the threshold is gene specific). See https://github.com/LewisLabUCSD/CellFie/wiki/Threshold-definition for more details.
               legalValues:
                 type: string
                 enum:
-                  - Hartford
-                  - Urban-Craig
-                  - Conventional A
-                  - Conventional B
+                  - global
+                  - local
               parameterValue:
-                value: Hartford
-        patientVariables:
+                value: global
+        subjectVariables:
           type: array
           items:
-            $ref: '#/components/schemas/PatientVariable'
+            $ref: '#/components/schemas/SubjectVariable'
           example:
-            - id: 'LOINC:30525-0'
-              certitude: 1
-              how: The value was specified by the end user.
-              title: Age
+            - id: 'FUSE:age'
+              certitude: 2
+              how: From Immunespace
+              title: age
               variableValue:
                 value: '.5'
                 units: years
               why: >-
-                Age is used to calculate the creatinine clearance. Dosing is
-                lower for geriatric patient and contraindicated for pediatric
-                patients
+                Age is used for comparing subjects
               legalValues:
                 type: number
                 minimum: '0'
         timestamp:
-          description: 'If absent, defaults to current time. Can be overridden by patientVariables timestamp value on a variable-by-variable basis.'
+          description: 'If absent, defaults to current time. Can be overridden by subjectVariables timestamp value on a variable-by-variable basis.'
           type: string
           format: date-time
           example: '2019-12-03T13:41:09.942+00:00'
@@ -432,34 +427,33 @@ components:
       type: object
       description: >-
         Used for selecting plugins. For example, a selector that provides the
-        value of a drug class informs what type of guidance plugin is required,
-        or an URL to a FHIR server informs FHIR server/mapper plugin combination
-        to use.
+        value of an organism informs what type of mapping plugin is required,
+        or the name of a model informs what type of analysis plugin to use.
       required:
         - id
       properties:
         id:
           type: string
           description: >-
-            The client should have prior knowledge of the full list of selectors
-            available with this version of the mapper. This unique id is used to
+            The client must have prior knowledge of the full list of selectors
+            available for a given version of a mapper. So this unique selector id is used to
             determine which selector type is described. Stylistically, the id will
             end in the community standard coding system used for this type, e.g.,
-            FHIR.URI, dosing.rxCUI. But not always, e.g., PDS:sars is a selector 
-            for choosing guidance for treatement vs capacity.
-          example: FHIR.URI
+            taxid.NCBI, but not always, e.g., FUSE:iHSA is a selector 
+            for choosing analysis using the iHSA model on human organisms.
+          example: taxid.NCBI
         legalValues:
           type: object
           description: >-
             If absent, all values are legal, so treat the value like a string.
             Use the JSON schema,
             https://json-schema.org/draft/2019-09/json-schema-validation.html.
-            For example, { type: 'string', 'enum': [ 'Gentamicin', 'Amikacin' ]
+            For example, { type: 'string', 'enum': [ '9606', '10090' ]
             } to define an enumeration,  { 'type': 'number' } for a float, and {
             'type': 'number', 'minimum': '0' } for a positive number, and {
             'type': 'integer' } for an integer. Furthermore, a non-standard
             'title' can be added in support of a human-readable string for the
-            type's value. This maybe be implemented by the PDS to aid in
+            type's value. This maybe be implemented by FUSE to aid in
             debugging, however clients should not depend on this value. NOTE:
             This value is actually an object type, but we use 'string' here to
             overcome a shortcoming of the swagger ui. This design choice was
@@ -468,10 +462,9 @@ components:
           example:
             type: string
             enum:
-              - value: 'urn://cdwh.nctracs.v1'
-                title: NCTraCS Carolina Data Warehouse
-              - value: 'http://hapi.fhir.org/baseR4'
-              - value: 'https://open-ic.epic.com/FHIR/api/FHIR/DSTU2'
+              - value: '9606'
+                title: Human
+              - value: '10090'
         selectorValue:
           type: string
           description: >-
@@ -480,11 +473,11 @@ components:
             design choice was made in order to prioritize a better interactive
             documentation experience for the API user. 
           example:
-            value: 'http://hapi.fhir.org/baseR4'
-            title: Hapi FHIR base URL
+            value: '9606'
+            title: Human
         title:
           type: string
-          example: FHIR URI - an URL (locator) or an URN (unique name)
+          example: NCBI organismal taxonomy id
           description: Human-readable name for this selector type.
     PluginParameter:
       type: object
@@ -502,25 +495,25 @@ components:
             Parameters are completely defined by the plugin and need not be
             interchangable with other plugins. The client will have no prior
             knowledge for plugin parameters.
-          example: 'pdspi-guidance-example:1'
+          example: 'FUSE:geneList'
         title:
           type: string
           description: >-
             A non-standardized, human-readable string to describe the id. May be
-            implemented by the PDS to aid in debugging, clients should not
+            implemented by FUSE to aid in debugging, clients should not
             depend on this value.
-          example: Extended interval nomogram
+          example: >-
+            Gene list specifying which genes to return
         parameterDescription:
           type: string
           description: >-
             A precise description of the parameter, provided by the plugin requiring
-            the parameter. This description can be served by the client to  guide the
+            the parameter. This description can be served by the client to guide the
             user in overriding default parameter values. Plugins should consider using
             a message catalog to hold parameterDescription strings in order to 
             facilitate internationalization.
           example: >-
-            This calculator uses one of four extended-interval nomograms. Please
-            choose one nomogram.
+            Please choose 'all' to return all genes, 'intersection' to return the intersection of all genes in the group of aliquots, or 'specific' to use a specific list of genes.
         parameterValue:
           type: object
           description: >-
@@ -529,14 +522,14 @@ components:
             This design choice was made in order to prioritize a better
             interactive documentation experience for the API user.
           example:
-            value: Hartford
+            value: specific
         legalValues:
           type: object
           description: >-
             If absent, all values are legal, so treat the value like a string.
             Use the JSON schema,
             https://json-schema.org/draft/2019-09/json-schema-validation.html.
-            For example, { type: 'string', 'enum': [ 'Gentamicin', 'Amikacin' ]
+            For example, { type: 'string', 'enum': [ 'all', 'intersection' ]
             } to define an enumeration,  { 'type': 'number' } for a float, and {
             'type': 'number', 'minimum': '0' } for a positive number, and {
             'type': 'integer' } for an integer. NOTE: This value is actually an
@@ -546,15 +539,13 @@ components:
           example:
             type: string
             enum:
-              - Hartford
-              - Urban-Craig
-              - Conventional A
-              - Conventional B
-    PatientVariable:
+              - value: 'all'
+                title: 'intersection'
+              - value: 'specific'
+    SubjectVariable:
       description: >-
-        Used to specify EHR patient values as well as user-supplied overrides of
-        those EHR values, and/or user-supplied replacements for values missing
-        in the EHR.
+        Used to specify subject values sourced from the digital object server, as well as user-supplied overrides of
+        those values, and/or user-supplied replacements for values missing in the original data source.
       type: object
       required:
         - id
@@ -562,12 +553,12 @@ components:
         id:
           type: string
           description: >-
-            The id for one of the patient variables supported by this PDS
-            version. The client has the option of ignoring this variable if it
+            The id for one of the subject variables supported by this FUSE
+            version. The api client (e.g., dashboard) has the option of ignoring any variable if the client
             doesn't recognize the id, but if another plugin requires this variable, 
-            then the user won't have the option of overriding it if the client ignores it.
+            then the end user won't have the option of overriding that ignored variable.
             Stylistically, community standard coding system used for this type will 
-            preface the code used, e.g., LOINC:3025-0, ICD10:R53, HP:0000819, rxCUI:1596450, etc.
+            preface the code used, e.g., taxid:9606, HGNC:1000, LOINC:30525-0, etc.
           example: 'LOINC:30525-0'
         certitude:
           type: integer
@@ -580,27 +571,27 @@ components:
         variableDescription:
           type: string
           description: >-
-            Description of the patient variable can optionally be set by the plugin. Patient
+            Description of the subject variable can optionally be set by the plugin. Subject
             variable descriptions should describe the variable precisely; for
             example, rather than say simply 'BMI',the variable might be
-            described as 'nearest BMI prior to intervention', or
-            'comma-delimited list of {BMI,date} objects for the patient with a
+            described as 'nearest BMI prior to measurement', or
+            'comma-delimited list of {BMI,date} objects for the subject with a
             given study period, as defined by the 'study-start', 'study-end'
-            model parameters'. The comprehensive list of supported patient variables is tied to
-            the PDS release. 
-          example: "The age is determined by subtracting the birthdate from the current time. Also known as 'chronological age' or 'Post Natal Age' (PNA). Specified as somen fraction of years, convention."
+            model parameters'. The comprehensive list of supported subject variables is tied to
+            the FUSE release. 
+          example: "The age is determined by subtracting the birthdate from the relative time. Also known as 'chronological age' or 'Post Natal Age' (PNA). Specified as some fraction of years, convention."
         how:
           type: string
           description: >-
             A value of 'The value was specified by the end user.' indicates
-            that the EHR value (whether or not it was missing in the EHR)
-            has been overriden by the client.
+            that the data source value (whether or not it was missing in the data source)
+            has been overriden by the end user.
           example: The value was specified by the end user.
         title:
           type: string
           description: >-
-            A non-standardized, human-readable string to describe the id. May be
-            implemented by the PDS to aid in debugging, clients should not
+            A non-standardized, human-readable string to describe the subject variable. May be
+            implemented by FUSE to aid in debugging, clients should not
             depend on this value.
           example: Age
         variableValue:
@@ -625,18 +616,18 @@ components:
             Provides the client with a human-readable, non-standard
             justification for why the plugin needs this particular variable.
             This can be rendered by the client to provide the end-user with
-            rationale for the patient values, but does not address how the value
+            rationale for the subject values, but does not address how the value
             was computed.
           example: >-
             Age is used to calculate the creatinine clearance. Dosing is lower
-            for geriatric patient and contraindicated for pediatric patients
+            for geriatric subject and contraindicated for pediatric subjects
         legalValues:
           type: object
           description: >-
             If absent, all values are legal, so treat the value like a string.
             Use the JSON schema,
             https://json-schema.org/draft/2019-09/json-schema-validation.html.
-            For example, { type: 'string', 'enum': [ 'Gentamicin', 'Amikacin' ]
+            For example, { type: 'string', 'enum': [  'all', 'intersection'  ]
             } to define an enumeration,  { 'type': 'number' } for a float, and {
             'type': 'number', 'minimum': '0' } for a positive number, and {
             'type': 'integer' } for an integer.
@@ -647,13 +638,13 @@ components:
             type: string
             description: >-
               A 'tag' for grouping semantically similar variables. Used to inform
-              the client on how to render many patient variables, e.g., 'Symptom', 
-              'Profile', 'Pre-existing condition'. Can be safely ignored by client.
-            example: "Patient variable"
+              the client on how to render many subject variables, e.g., 'Aliquot', 
+              'Sample', 'Subject'. Can be safely ignored by client.
+            example: "Sample"
         timestamp:
           type: string
           description: >-
-            The time used to compute the patient variable. For example, this could be the current time if a patient is presenting for treatment, or in a retrospective study, it could be an intervention date, or any date within the retrospective study timeframe.
+            The time used to compute the subject variable, for example, time of the expression data.
           format: date-time
           example: "2020-07-01T14:29:15.453Z"
     Bundle:
