@@ -1,9 +1,6 @@
 import os
 import logging
 from pathlib import Path
-from tx.functional.maybe import Just, Nothing
-from tx.functional.either import Left
-from tx.functional.utils import identity
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
