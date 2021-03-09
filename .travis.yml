@@ -1,9 +1,0 @@
-services:
-  - docker
-
-branches:
-  only:
-    - main
-
-script:
-  - /bin/bash hooks/test
