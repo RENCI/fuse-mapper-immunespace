@@ -60,4 +60,4 @@ Upon any commit to the `main` or tagged branches, this repo will be pulled by do
 
 * create fuse-cdm-specs
 * get this to take real data and not return hard-coding:
-`curl -X POST -H "Content-Type: application/json" --data '{"subjectIds":["1","2"], "timestamp":"2020-07-01T14:29:15.453Z", "data":{"foo":"bar"} }' http://localhost:8082/mapping`
+`curl -X POST -H "Content-Type: application/json" --data '{"objectIds":["1","2"], "timestamp":"2020-07-01T14:29:15.453Z", "data":{"foo":"bar"} }' http://localhost:8082/mapping`

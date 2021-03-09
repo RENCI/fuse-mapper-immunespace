@@ -5,26 +5,58 @@
             {"id":"FUSE:geneListType", "value":"specific"},
             {"id":"FUSE:geneList", "value": ["6005","622","6120"]}
         ],
-        "subjectVariables": [
+        "objectVariables": [
             {
                 "id": "FUSE:expression",
                 "certititude": 2,
                 "how": "From Immunescape microarrays",
                 "title": "gene expression",
-                "value": {
+                "variableValue": {
                     "sampleId":"SAMP:1", 
                     "aliquotId":"SAMP:1",
                     "system": "ensembl",
-                    "eset": {"6005":0.5, "622":0.4, "6120":0.3, "22934":0.2}
+                    "value": {"6005":0.5, "622":0.4, "6120":0.3, "22934":0.2}
                 }
             },
             {
-                "id": "FUSE:gender",
+                "id": "LOINC:72143-1",
                 "certitude": 2,
                 "how": "From Immunescape",
                 "title": "gender",
-                "value": "M"
-            }
+                "variableValue": {
+		    "value": "M"
+		}
+            },
+	    {
+		"id": "LOINC:30525-0",
+                "certitude": 1,
+                "how": "From Immunescape",
+                "title": "age",
+                "variableValue": {
+		    "value": 57.5,
+		    "units": "years"
+		}
+	    },
+	    {
+		"id": "FUSE:ageMin",
+                "certitude": 2,
+                "how": "From Immunescape",
+                "title": "Minimum possible age",
+                "variableValue": {
+		    "value": 55,
+		    "units": "years"
+		}
+	    },
+	    {
+		"id": "FUSE:ageMax",
+                "certitude": 2,
+                "how": "From Immunescape",
+                "title": "Maximum possible age",
+                "variableValue": {
+		    "value": 60,
+		    "units": "years"
+		}
+	    }
         ]
     },
     "data": [

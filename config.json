@@ -7,7 +7,7 @@
     "settingsDefaults": {
         "pluginSelectors": [],
         "pluginParameters": [],
-        "aliquotVariables": [
+        "objectVariables": [
             {
                 "id": "FUSE:system",
                 "title": "Gene ID encoding systme",

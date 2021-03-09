@@ -35,42 +35,12 @@ paths:
                           "legalValues": { "type": "string", "format": "time-stamp" }
                         }
                       ],
-                      "subjectVariables": [
+                      "objectVariables": [
                         {
                           "id": "LOINC:30525-0",
                           "title": "Age",
-                          "variableDescription": "Fractional age of subject relative to [current-time].",
+                          "variableDescription": "Fractional age of object relative to [current-time].",
                           "legalValues": { "type": "number", "minimum": "0" },
-                        },
-                        {
-                          "id": "1114195.extant",
-                          "title": "Rivoroxaban, extant",
-                          "variableDescription": "Dosing of rivoroxaban, based on the finding of any rxnorm codes found on the record that map to rxCUI 1114195.",
-                          "legalValues": { "type": "number" } 
-                        },
-                        {
-                          "id": "1114195.intensity",
-                          "title": "Rivoroxaban, dosage",
-                          "variableDescription": "Dosing of rivoroxaban.",
-                          "legalValues": { "type": "number", "minimum": 0  } 
-                        },
-                        {
-                          "id": "HP:0001892.extant.days",
-                          "title": "Bleeding, days since",
-                          "variableDescription": "Days since the last bleeding event, relative to current-time. A value < -age means never. Bleeding events are identified by one of 50 ICD10 codes or 42 ICD9 codes.",
-                          "legalValues": { "type": "number" } 
-                        },
-                        {
-                          "id": "HP:0000077.extant.boolean",
-                          "title": "Kidney dysfunction, extant",
-                          "variableDescription": "If true, then Kidney dysfunction was found in the record for the subject, relative to current-time.",
-                          "legalValues": { "type": "boolean" },
-                        },
-                        {
-                          "id": "1114195.extant.count",
-                          "title": "Rivoroxaban dosing count",
-                          "variableDescription": "Number of times subject was dosed with Rivoroxaban.",
-                          "legalValues": { "type": "number" } 
                         },
                       ]
                     }
@@ -127,7 +97,7 @@ paths:
               description: "Send in array of data"
               type: object
               required:
-                - subjectIds
+                - objectIds
                 - data
               properties:
                 txid:
@@ -135,14 +105,14 @@ paths:
                 timeout:
                   type: integer
                   description: "Number of milliseconds until time out. Factory system default should be 120000 (2 minutes)."
-                subjectIds:
-                  description: "Map these subject ids from the digital object server"
+                objectIds:
+                  description: "Map these object ids from the digital object server"
                   example: [38]
                   type: array
                   items:
                     type: string
                 data:
-                  description: "An array of digital objects, one per subject id."
+                  description: "An array of digital objects, one per object id."
                   anyOf:
                     - type: array
                       items:
@@ -164,12 +134,12 @@ paths:
                 items:
                   type: object
                   properties:
-                    subjectId:
+                    objectId:
                       type: string
                     values:
                       type: array
                       items:
-                        $ref: "#/components/schemas/SubjectVariable"
+                        $ref: "#/components/schemas/ObjectVariable"
         '400':
           description: "Bad Request"
           content:
@@ -196,7 +166,7 @@ paths:
                       values:
                         type: array
                         items:
-                          $ref: "#/components/schemas/SubjectVariable"
+                          $ref: "#/components/schemas/ObjectVariable"
         '500':
           description: "Internal Server Error"
           content:
@@ -211,7 +181,7 @@ paths:
                     example: [  {
                       "timestamp": "2019-09-20T00:00:01Z",
                       "event": "Error mapping [Age] for [fuse-mapper-immunespace].",
-                      "source": "subject Bundle",
+                      "source": "object Bundle",
                       "level": 1,
                       "action": "Arbitrarily setting age to '35-55' with certitude 0 (not certain)"
                       },
@@ -231,7 +201,7 @@ paths:
                       values:
                         type: array
                         items:
-                          $ref: "#/components/schemas/SubjectVariable"
+                          $ref: "#/components/schemas/ObjectVariable"
 components:
   schemas:
     Message:
@@ -304,7 +274,7 @@ components:
         title:
           type: string
           description: Meaningful name for this plugin
-          example: Immunespace subject variable mapper
+          example: Immunespace object variable mapper
         enabled:
           type: boolean
           description: >-
@@ -401,10 +371,10 @@ components:
                   - local
               parameterValue:
                 value: global
-        subjectVariables:
+        objectVariables:
           type: array
           items:
-            $ref: '#/components/schemas/SubjectVariable'
+            $ref: '#/components/schemas/ObjectVariable'
           example:
             - id: 'FUSE:age'
               certitude: 2
@@ -414,12 +384,12 @@ components:
                 value: '.5'
                 units: years
               why: >-
-                Age is used for comparing subjects
+                Age is used for comparing objects
               legalValues:
                 type: number
                 minimum: '0'
         timestamp:
-          description: 'If absent, defaults to current time. Can be overridden by subjectVariables timestamp value on a variable-by-variable basis.'
+          description: 'If absent, defaults to current time. Can be overridden by objectVariables timestamp value on a variable-by-variable basis.'
           type: string
           format: date-time
           example: '2019-12-03T13:41:09.942+00:00'
@@ -542,9 +512,9 @@ components:
               - value: 'all'
                 title: 'intersection'
               - value: 'specific'
-    SubjectVariable:
+    ObjectVariable:
       description: >-
-        Used to specify subject values sourced from the digital object server, as well as user-supplied overrides of
+        Used to specify object values sourced from the digital object server, as well as user-supplied overrides of
         those values, and/or user-supplied replacements for values missing in the original data source.
       type: object
       required:
@@ -553,7 +523,7 @@ components:
         id:
           type: string
           description: >-
-            The id for one of the subject variables supported by this FUSE
+            The id for one of the object variables supported by this FUSE
             version. The api client (e.g., dashboard) has the option of ignoring any variable if the client
             doesn't recognize the id, but if another plugin requires this variable, 
             then the end user won't have the option of overriding that ignored variable.
@@ -571,13 +541,13 @@ components:
         variableDescription:
           type: string
           description: >-
-            Description of the subject variable can optionally be set by the plugin. Subject
+            Description of the object variable can optionally be set by the plugin. Object
             variable descriptions should describe the variable precisely; for
             example, rather than say simply 'BMI',the variable might be
             described as 'nearest BMI prior to measurement', or
-            'comma-delimited list of {BMI,date} objects for the subject with a
+            'comma-delimited list of {BMI,date} objects for the object with a
             given study period, as defined by the 'study-start', 'study-end'
-            model parameters'. The comprehensive list of supported subject variables is tied to
+            model parameters'. The comprehensive list of supported object variables is tied to
             the FUSE release. 
           example: "The age is determined by subtracting the birthdate from the relative time. Also known as 'chronological age' or 'Post Natal Age' (PNA). Specified as some fraction of years, convention."
         how:
@@ -590,7 +560,7 @@ components:
         title:
           type: string
           description: >-
-            A non-standardized, human-readable string to describe the subject variable. May be
+            A non-standardized, human-readable string to describe the object variable. May be
             implemented by FUSE to aid in debugging, clients should not
             depend on this value.
           example: Age
@@ -616,11 +586,11 @@ components:
             Provides the client with a human-readable, non-standard
             justification for why the plugin needs this particular variable.
             This can be rendered by the client to provide the end-user with
-            rationale for the subject values, but does not address how the value
+            rationale for the object values, but does not address how the value
             was computed.
           example: >-
             Age is used to calculate the creatinine clearance. Dosing is lower
-            for geriatric subject and contraindicated for pediatric subjects
+            for geriatric object and contraindicated for pediatric objects
         legalValues:
           type: object
           description: >-
@@ -638,13 +608,13 @@ components:
             type: string
             description: >-
               A 'tag' for grouping semantically similar variables. Used to inform
-              the client on how to render many subject variables, e.g., 'Aliquot', 
-              'Sample', 'Subject'. Can be safely ignored by client.
+              the client on how to render many object variables, e.g., 'Aliquot', 
+              'Sample', 'Object'. Can be safely ignored by client.
             example: "Sample"
         timestamp:
           type: string
           description: >-
-            The time used to compute the subject variable, for example, time of the expression data.
+            The time used to compute the object variable, for example, time of the expression data.
           format: date-time
           example: "2020-07-01T14:29:15.453Z"
     Bundle:

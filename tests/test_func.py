@@ -41,7 +41,7 @@ def test_mapping():
         "why": f"subj var why",
         "id": "subj var",
     }
-    q = {"subjectIds":["1"], "timestamp":"2020-07-01T14:29:15.453Z", "data":{"foo":"bar"} }
+    q = {"objectIds":["1"], "timestamp":"2020-07-01T14:29:15.453Z", "data":{"foo":"bar"} }
     
     resp = requests.post(f"{appliance}/mapping", headers=json_headers, json=q)
     print(json.dumps(resp.json(), indent=4))
@@ -62,8 +62,8 @@ def test_mapping():
 
 # xxx
 # change this to be per-person:
-# can ask for a record by subject id
-# subject id list,
+# can ask for a record by object id
+# object id list,
 # or by cohort id, to get a 
 examplar_return={
     "mappings": {

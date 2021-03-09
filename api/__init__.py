@@ -7,18 +7,18 @@ logger = logging.getLogger(__name__)
 
 def get_mapping(body):
     # kludge, works for this query:
-    # curl -X POST -H "Content-Type: application/json" --data '{"subjectIds":["1", "2"], "timestamp":"2020-07-01T14:29:15.453Z", "data":{"foo":"bar"} }' http://localhost:8082/mapping
+    # curl -X POST -H "Content-Type: application/json" --data '{"objectIds":["1", "2"], "timestamp":"2020-07-01T14:29:15.453Z", "data":{"foo":"bar"} }' http://localhost:8082/mapping
     ret_response = []
     ret_response.append(
         [
             {
-                "subjectId": "1",
+                "objectId": "1",
                 "values": [
                     {
                         "title": "Age",
                         "id": "LOINC:30525-0",
                         "certitude": 2,
-                        "group": "Subject variable",
+                        "group": "Object variable",
                         "how": "The value was specified by the end user.",
                         "legalValues": {
                             "minimum": "0",
@@ -30,7 +30,7 @@ def get_mapping(body):
                             "units": "years",
                             "value": "0.5"
                         },
-                        "why": "Age is used to compare the gene expression of same-age subjects"
+                        "why": "Age is used to compare the gene expression of same-age objects"
                     },
                     {
                         "title": "Gene expression",
@@ -47,13 +47,13 @@ def get_mapping(body):
                 ]
             },
             {
-                "subjectId": "2",
+                "objectId": "2",
                 "values": [
                     {
                         "title": "Age",
                         "id": "LOINC:30525-0",
                         "certitude": 2,
-                        "group": "Subject variable",
+                        "group": "Object variable",
                         "how": "The value was specified by the end user.",
                         "legalValues": {
                             "minimum": "0",
@@ -65,7 +65,7 @@ def get_mapping(body):
                             "units": "years",
                             "value": "10.7"
                         },
-                        "why": "Age is used to compare the gene expression of same-age subjects"
+                        "why": "Age is used to compare the gene expression of same-age objects"
                     },
                     {
                         "title": "Gene expression",
