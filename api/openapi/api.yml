@@ -118,7 +118,7 @@ paths:
   /mapping:
     post:
       summary: map from patient record to clinical feature variables
-      operationId: api.mappingClinicalFromData
+      operationId: api.get_mapping
       parameters: []
       requestBody:
         content:

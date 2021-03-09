@@ -1,0 +1,54 @@
+{
+    "settingsRequested": {
+        "pluginParameters": [
+            {"id":"FUSE:system", "value":"entrez"},
+            {"id":"FUSE:geneListType", "value":"specific"},
+            {"id":"FUSE:geneList", "value": ["6005","622","6120"]}
+        ],
+        "subjectVariables": [
+            {
+                "id": "FUSE:expression",
+                "certititude": 2,
+                "how": "From Immunescape microarrays",
+                "title": "gene expression",
+                "value": {
+                    "sampleId":"SAMP:1", 
+                    "aliquotId":"SAMP:1",
+                    "system": "ensembl",
+                    "eset": {"6005":0.5, "622":0.4, "6120":0.3, "22934":0.2}
+                }
+            },
+            {
+                "id": "FUSE:gender",
+                "certitude": 2,
+                "how": "From Immunescape",
+                "title": "gender",
+                "value": "M"
+            }
+        ]
+    },
+    "data": [
+        {
+            "id":"SUBJ:subj1",
+            "groups": ["A"],
+            "gender":"M",
+            "age": "55-60",
+            "samples": [
+                { 
+                    "id":"SAMP:1",
+                    "modality":"microarray", 
+                    "capture":"total RNA", 
+                    "lab":"Broad Institute",
+                    "aliquots": [
+                        {
+                            "aliquotId":"SAMP:1",
+                            "eset": {"6005":0.5, "622":0.4, "6120":0.3, "22934":0.2},
+                            "system": "ensembl"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
+

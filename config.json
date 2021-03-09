@@ -6,6 +6,7 @@
     "pluginSelectors": [],
     "settingsDefaults": {
         "pluginSelectors": [],
+        "pluginParameters": [],
         "aliquotVariables": [
             {
                 "id": "FUSE:system",

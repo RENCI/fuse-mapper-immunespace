@@ -144,17 +144,39 @@ def test_api_passthrough():
     result._content = b'{ "key" : "a" }'
     result.status_code = 200
 
-    print(result.content)
+    #print(result.content)
     assert result.status_code == 200
     assert result.json() ==  {"key" : "a" }
 
 def test_config():
-    # config_path = Path(__file__).parent.parent / "config.json"
     config_path = Path(__file__).parent / "config.json"
     with open(config_path) as f:
         config=json.load(f)
-
     resp = requests.get(f"{appliance}/config")
-    #print(resp.content)
     assert resp.json() == config
+
+
+json_headers = {
+    "Accept": "application/json"
+}
+
+def test_mapping():
+    test_file="expected/1_mapping.json"
+    expected_path = Path(__file__).parent /  test_file
+    with open(expected_path) as f:
+        expected=json.load(f)
+
+    pv =  {
+        "title": f"subj var title",
+        "legalValues": {
+            "type": "integer"
+        },
+        "why": f"subj var why",
+        "id": "subj var",
+    }
+    q = {"patientIds":["1"], "timestamp":"2020-07-01T14:29:15.453Z", "data":{"foo":"bar"} }
+    
+    resp = requests.post(f"{appliance}/mapping", headers=json_headers, json=q)
+    print(json.dumps(resp.json(), indent=4))
+    #assert resp.json() == expected
     return True
