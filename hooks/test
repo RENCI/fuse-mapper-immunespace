@@ -1,4 +1,0 @@
-#!/bin/bash
-export LOG_LEVEL=WARNING
-export SUBNET=172.18.1.0/24
-tests/test.sh
