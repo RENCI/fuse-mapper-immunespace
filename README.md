@@ -4,7 +4,7 @@
 
 Maps the input gene expression to the requested format. Also returns certainty of the computed value (certitude); e.g., if a gene doesn't map, a default value will be set and the certitude will be set to 0 (uncertain); 2 (certain) otherwise).
 
-Can be run as a stand-alone appliance (see `up.sh` below) or as a plugin to a FUSE deployment (e.g., (fuse-immcellfie)[http://github/RENCI/fuse-immcellfie]).
+Can be run as a stand-alone appliance (see `up.sh` below) or as a plugin to a FUSE deployment (e.g., [fuse-immcellfie](http://github.com/RENCI/fuse-immcellfie)).
 
 ## prerequisites:
 * python 3.8 or higher
@@ -33,7 +33,7 @@ sudo chmod 755 $DESTINATION
 
 Don't change these:
 * __DOCKER_BUILDKIT__ required for dockerfile-plus (INCLUDE+ instruction)
-* COMPOSE_DOCKER_CLI_BUILD required for dockerfile-plus (INCLUDE+ instruction)
+* __COMPOSE_DOCKER_CLI_BUILD__ required for dockerfile-plus (INCLUDE+ instruction)
 
 
 ## start
@@ -51,6 +51,10 @@ WARNING: This only works because `config/config.py` hardcodes the config. Please
 ```
 ./down.sh
 ```
+## regression testing
+For repo owners:
+
+Upon any commit to the `main` or tagged branches, this repo will be pulled by dockerhub and `tests/test.sh` will be run. In order for the tests to pass, any variables required to be set in `.env` must also be set in Dockerhub's 'configure automated builds' section of the [txscience/fuse-mapper-immunespace dockerhub repo](https://hub.docker.com/repository/docker/txscience/fuse-mapper-immunespace/builds). The tag on this README will indicate testing status of the last commit.
 
 ## TO DO:
 
