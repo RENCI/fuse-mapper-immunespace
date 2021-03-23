@@ -43,7 +43,7 @@ Don't change these:
 
 ## validate installation
 ```
-curl -X GET http://localhost:8082/config
+curl -X GET http://localhost:8083/config
 ```
 WARNING: This only works because `config/config.py` hardcodes the config. Please fix this ASAP and remove this comment.
 

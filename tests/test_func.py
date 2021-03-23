@@ -3,12 +3,13 @@ from pathlib import Path
 import logging
 import os
 import json
+import pytest
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 appliance="http://fuse-mapper-immunespace:8080"
-# xxx log.info(f"starting on port (${API_PORT})")
+log.info(f"starting on port ("+appliance+")")
 
 json_headers = {
     "Content-Type": "application/json",
@@ -16,6 +17,9 @@ json_headers = {
 }
 
 def test_config():
+    if os.getenv('TEST_LIBRARY') == "1":
+        pytest.skip("Only testing docker lib")
+
     config_path = Path(__file__).parent / "config.json"
     with open(config_path) as f:
         config=json.load(f)
@@ -27,122 +31,29 @@ json_headers = {
     "Accept": "application/json"
 }
 
+# other endpoint tests, start with "test_"
+
 def test_mapping():
-    test_file="expected/1_mapping.json"
-    expected_path = Path(__file__).parent /  test_file
-    with open(expected_path) as f:
-        expected=json.load(f)
 
-    pv =  {
-        "title": f"subj var title",
-        "legalValues": {
-            "type": "integer"
-        },
-        "why": f"subj var why",
-        "id": "subj var",
-    }
-    q = {"objectIds":["1"], "timestamp":"2020-07-01T14:29:15.453Z", "data":{"foo":"bar"} }
-    
-    resp = requests.post(f"{appliance}/mapping", headers=json_headers, json=q)
-    print(json.dumps(resp.json(), indent=4))
-    #assert resp.json() == expected
-    return True
+    if os.getenv('TEST_LIBRARY') == "1":
+        pytest.skip("Only testing docker lib")
 
-# ----NOTES FOLLOW ----
+    with open("tests/input/test_2.json", 'r', encoding='utf-8') as f:
+        query = json.load(f)
 
-# some nice parameters might include:
-# id_source=entrez/ncbi | hgnc | ensembl 
-# id_type=transcript_id|gene_id
-# normalized=none|deseq2
-# transpose=yes(genes on cols)|no(genes on rows)
-# filter=<genelist>
-# filter_id=<genelist id on server to use for filter>
-# 
+    log.info(f"Asking for mapping")
 
+    mapping = requests.post(f"{appliance}/mapping", headers=json_headers, json=query)
 
-# xxx
-# change this to be per-person:
-# can ask for a record by object id
-# object id list,
-# or by cohort id, to get a 
-examplar_return={
-    "mappings": {
-        "txid": "xyz1", 
-        "values": [
-            {
-                "variable_id": "eset:array.1",
-                "certitude": 2,
-                "how": "retrieved from Immunescape",
-                "group": "PatientVariables",
-                "title": "Gene Expression array",
-                "variableValue": {
-                    "geneExpression":[{"id":"1000", "system":"HGNC", "value":1.00}, {"id":"100", "system":"HGNC", "value":1.50}],
-                    "type": "array",
-                    "units": "counts"
-                },
-                "why": "Required for many phenotype models"
-            },
-            {
-                "variable_id": "eset:site.1",
-                "certitude": 2,
-                "how": "retrieved from Immunescape",
-                "group": "PatientVariables",
-                "title": "Anatomical Site from which gene expression was taken",
-                "variableValue": {
-                    "anatomicSite": "Bladder",
-                    "type": "string"
-                }
-            },
-            {
-                "variable_id": "eset:class.1",
-                "certitude": 2,
-                "how": "retrieved from Immunescape",
-                "group": "PatientVariables",
-                "title": "Tissue class",
-                "variableValue": {
-                    "tissueClass": "normal",
-                    "type": "string"
-                }
-            },
-            {
-                "variable_id": "person:disease.1",
-                "certitude": 2,
-                "how": "retrieved from Immunescape",
-                "group": "PatientVariables",
-                "title": "Disease status of person",
-                "variableValue": {
-                    "diseaseStatus": "BLCA",
-                    "type": "string"
-                }
-            },
-            {
-                "variable_id": "person:gender.1",
-                "certitude": 2,
-                "how": "retrieved from Immunescape",
-                "group": "PatientVariables",
-                "title": "Gender",
-                "variableValue": {
-                    "gender": "M",
-                    "type": "string"
-                }
-            }
-        ]
-    },
-    "message":[
-        {
-            "action": "Arbitrarily setting gender to M with certitude 0 (not certain) for aliquot xyz",
-            "event": "Error mapping [Gender] for [fuse-mapper-immunespace].",
-            "level": 1,
-            "source": "fuse-mapper-immunespace:test_func()",
-            "timestamp": "2019-09-20T00:00:01Z"
-        },
-        {
-            "action": "Returning only a subset of mapped variables and aborting.",
-            "event": "Cannot respond in [500]ms, [fuse-mapper-immunespace].",
-            "level": 1,
-            "source": "fuse-mapper-immunespace:test_func()",
-            "timestamp": "2019-09-20T00:00:01Z"
-        }
-    ]
-}
+    with open("tests/expected/test_2.json", 'r', encoding='utf-8') as f:
+        expected = json.load(f)
+
+    mappings = json.dumps(mapping, ensure_ascii=False, indent=4, sort_keys=True)
+    expecteds = json.dumps(expected, ensure_ascii=False, indent=4, sort_keys=True)
+
+    if(g_debug):
+        print("mapping:")
+        print(mappings)
+
+    assert mappings == expecteds
 
