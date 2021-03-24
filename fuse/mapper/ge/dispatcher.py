@@ -23,79 +23,158 @@ def _get_mapping(query):
     # curl -X POST -H "Content-Type: application/json" --data '{"objectIds":["1", "2"], "timestamp":"2020-07-01T14:29:15.453Z", "data":{"foo":"bar"} }' http://localhost:8082/mapping
     ret_response = []
     ret_response.append(
-         {
-                "objectId": "1",
-                "values": [
-                    {
-                        "title": "Age",
-                        "id": "LOINC:30525-0",
-                        "certitude": 2,
-                        "group": "Object variable",
-                        "how": "The value was specified by the end user.",
-                        "legalValues": {
-                            "minimum": "0",
-                            "type": "number"
+        {
+            "objectId": "1",
+            "participants": [
+                {
+                    "participantId": "test_empty",
+                    "values": [
+                        {
+                            "title": "Study Time Collected",
+                            "id": "study_time_collected",
+                            "certitude": 2,
+                            "group": "pData",
+                            "how": "The value was provided by the digital object server.",
+                            "timestamp": "2020-08-01T14:29:15.453Z",
+                            "variableValue": { "value":0, "units": "Days" }
                         },
-                        "timestamp": "2020-07-01T14:29:15.453Z",
-                        "variableDescription": "The age is determined by subtracting the birthdate from the current time. Also known as 'chronological age' or 'Post Natal Age' (PNA). Specified as somen fraction of years, convention.",
-                        "variableValue": {
-                            "units": "years",
-                            "value": "0.5"
-                        },
-                        "why": "Age is used to compare the gene expression of same-age objects"
-                    },
-                    {
-                        "title": "Gene expression",
-                        "id": "FUSE:expression",
-                        "certititude": 2,
-                        "how": "From Immunescape microarrays",
-                        "variableValue": {
-                            "sampleId":"SAMP:1", 
-                            "aliquotId":"SAMP:1",
-                            "system": "ensembl",
-                            "value": {"6005":0.5, "622":0.4, "6120":0.3, "22934":0.2}
+                        { 
+                            "title": "Gene expression",
+                            "id": "FUSE:expression",
+                            "certititude": 2,
+                            "how": "From Immunescape microarrays",
+                            "variableValue": {
+                                "value": {
+                                    "system": "entrez",
+                                    "aliquots": [ 
+                                        {
+                                            "aliquotId":"test_empty_aliquot1",
+                                            "value": {
+                                                "1": "1.0",
+                                                "503538": "2.0",
+                                                "29974": "3.0"
+                                            }
+                                        },
+                                        {
+                                            "aliquotId":"test_empty_aliquot2",
+                                            "value": {
+                                                "1": "1.5",
+                                                "503538": "2.5",
+                                                "29974": "3.5"
+                                            }
+                                        } 
+                                    ]
+                                }
+                            }
                         }
-                    }
-                ]
-            })
+                    ]
+                }
+            ]
+        }
+    )
+
     ret_response.append(
-            {
-                "objectId": "2",
-                "values": [
-                    {
-                        "title": "Age",
-                        "id": "LOINC:30525-0",
-                        "certitude": 2,
-                        "group": "Object variable",
-                        "how": "The value was specified by the end user.",
-                        "legalValues": {
-                            "minimum": "0",
-                            "type": "number"
+        {
+            "objectId": "cellfie_group2",
+            "participants": [ 
+                {
+                    "participantId": "SUB112834.269",
+                    "values": [
+                        {
+                            "title": "Study Time Collected",
+                            "id": "study_time_collected",
+                            "certitude": 2,
+                            "group": "pData",
+                            "how": "The value was provided by the digital object server.",
+                            "timestamp": "2020-08-01T14:29:15.453Z",
+                            "variableValue": { "value":0, "units": "Days" }
                         },
-                        "timestamp": "2020-08-01T14:29:15.453Z",
-                        "variableDescription": "The age is determined by subtracting the birthdate from the current time. Also known as 'chronological age' or 'Post Natal Age' (PNA). Specified as somen fraction of years, convention.",
-                        "variableValue": {
-                            "units": "years",
-                            "value": "10.7"
-                        },
-                        "why": "Age is used to compare the gene expression of same-age objects"
-                    },
-                    {
-                        "title": "Gene expression",
-                        "id": "FUSE:expression",
-                        "certititude": 2,
-                        "how": "From Immunescape microarrays",
-                        "variableValue": {
-                            "sampleId":"SAMP:1", 
-                            "aliquotId":"SAMP:1",
-                            "system": "ensembl",
-                            "value": {"6005":1.5, "622":0.74, "6120":0.33, "22934":1.2}
+                        {
+                            "title": "Gene expression",
+                            "id": "FUSE:expression",
+                            "certititude": 2,
+                            "how": "From Immunescape microarrays",
+                            "variableValue": {
+                                "value": {
+                                    "system": "entrez",
+                                    "aliquots": [ {
+                                        "aliquotId":"BS586128",
+                                        "value": {
+                                            "1": "3.78615018912845",
+                                            "503538": "3.68295613722495",
+                                            "29974": "3.82804625098162"
+                                        }
+                                    } ]
+                                }
+                            }
                         }
-                    }
-                ]
-            }
-   )
-    
+                    ]
+                },
+                {
+                    "participantId": "SUB112834.269",
+                    "values": [
+                        {
+                            "title": "Study Time Collected",
+                            "id": "study_time_collected",
+                            "certitude": 2,
+                            "group": "pData",
+                            "how": "The value was provided by the digital object server.",
+                            "timestamp": "2020-08-01T14:29:15.453Z",
+                            "variableValue": { "value": 7, "units": "Days" }
+                        },
+                        {
+                            "title": "Gene expression",
+                            "id": "FUSE:expression",
+                            "certititude": 2,
+                            "how": "From Immunescape microarrays",
+                            "variableValue": {
+                                "system": "entrez",
+                                "aliquots": [ {
+                                    "aliquotId":"BS586240",
+                                    "value": {
+                                        "1": "3.15087086107396",
+                                        "503538": "3.22078940893019",
+                                        "29974": "3.06783937011117"
+                                    }
+                                } ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "participantId": "SUB112832.269",
+                    "values": [
+                        {
+                            "title": "Study Time Collected",
+                            "id": "study_time_collected",
+                            "certitude": 2,
+                            "group": "pData",
+                            "how": "The value was provided by the digital object server.",
+                            "timestamp": "2020-08-01T14:29:15.453Z",
+                            "variableValue": { "value": 0, "units": "Days" }
+                        },
+                        {
+                            "title": "Gene expression",
+                            "id": "FUSE:expression",
+                            "certititude": 2,
+                            "how": "From Immunescape microarrays",
+                            "variableValue": {
+                                "system": "entrez",
+                                "aliquots": [ {
+                                    "aliquotId":"BS586131",
+                                    "value": {
+                                        "1": "3.68940264786164",
+                                        "503538": "3.51391883064394",
+                                        "29974": "3.50394031553657"
+                                    }
+                                } ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    )
     return ret_response
 
 # ----NOTES FOLLOW ----

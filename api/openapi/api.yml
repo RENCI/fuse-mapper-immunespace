@@ -308,23 +308,23 @@ components:
           type: object
           properties:
             experimentData:
-              type: object
+              type: array
               description: >-
                 May contain information such as the following: "Experimenter name", "Laboratory", "Contact information", "Title", "URL", "PMIDs", "notes"; and the "notes" may contain fields such as the following: "normalization", "summarizeBy", "org.Hs.eg.db_version", "featureAnnotationSet".
             exprs:
-              type: object
+              type: array
               description: >-
                 Comma-delimited lines, features (genes) on the rows, samples/aliquots on the columns.
             featureNames:
-              type: object
+              type: array
               description: >-
                 Names of the features (genes) in exprs. 
             pData:
-              type: object
+              type: array
               description: >-
                 Comma-delimited lines, samples on rows, covariates on columns; First row is covariate names
             phenoMetadata:
-              type: object
+              type: array
               description: >-
                 May contain descriptions for the covariate names in the pdata
             system:
@@ -536,9 +536,9 @@ components:
         those values, and/or user-supplied replacements for values missing in the original data source.
       type: object
       required:
-        - id
+        - objectId
       properties:
-        id:
+        objectId:
           type: string
           description: >-
             The id for one of the object variables supported by this FUSE
@@ -548,6 +548,36 @@ components:
             Stylistically, community standard coding system used for this type will 
             preface the code used, e.g., taxid:9606, HGNC:1000, LOINC:30525-0, etc.
           example: 'LOINC:30525-0'
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParticipantVariable'
+    ParticipantVariable:
+      description: >-
+        Contains the variable values for a single particpant, and all their aliquot samples
+      type: object
+      required:
+        - participantId
+      properties:
+        participantId:
+          description: >-
+            Unique identifier for a study participant
+          type: string
+        values:
+          description: >-
+            All the variables and their valuesfor this study participant
+          type: array
+          items:
+            $ref: '#/components/schemas/ParticipantVariableValue'
+    ParticipantVariableValue:
+      description: >-
+        Contains the variable values for a single particpant, and all their aliquot samples
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
         certitude:
           type: integer
           description: >-
@@ -556,18 +586,6 @@ components:
             bias in reporting certitude, with the assumption that human error 
             will be intercepted, and human intelligence overrides algorithm outputs.
           example: 2
-        variableDescription:
-          type: string
-          description: >-
-            Description of the object variable can optionally be set by the plugin. Object
-            variable descriptions should describe the variable precisely; for
-            example, rather than say simply 'BMI',the variable might be
-            described as 'nearest BMI prior to measurement', or
-            'comma-delimited list of {BMI,date} objects for the object with a
-            given study period, as defined by the 'study-start', 'study-end'
-            model parameters'. The comprehensive list of supported object variables is tied to
-            the FUSE release. 
-          example: "The age is determined by subtracting the birthdate from the relative time. Also known as 'chronological age' or 'Post Natal Age' (PNA). Specified as some fraction of years, convention."
         how:
           type: string
           description: >-
@@ -609,19 +627,6 @@ components:
           example: >-
             Age is used to calculate the creatinine clearance. Dosing is lower
             for geriatric object and contraindicated for pediatric objects
-        legalValues:
-          type: object
-          description: >-
-            If absent, all values are legal, so treat the value like a string.
-            Use the JSON schema,
-            https://json-schema.org/draft/2019-09/json-schema-validation.html.
-            For example, { type: 'string', 'enum': [  'all', 'intersection'  ]
-            } to define an enumeration,  { 'type': 'number' } for a float, and {
-            'type': 'number', 'minimum': '0' } for a positive number, and {
-            'type': 'integer' } for an integer.
-          example:
-            type: number
-            minimum: '0'
         group:
             type: string
             description: >-
@@ -635,5 +640,3 @@ components:
             The time used to compute the object variable, for example, time of the expression data.
           format: date-time
           example: "2020-07-01T14:29:15.453Z"
-    Bundle:
-      type: object
