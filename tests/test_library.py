@@ -3,14 +3,13 @@ import json
 import os
 import pytest
 
-g_debug = True
-#g_debug = False
+#g_debug = True
+g_debug = False
 
 def test_GetMapping():
 
     if os.getenv('TEST_LIBRARY') == "0":
         pytest.skip("Only testing docker container")
-
 
     with open("tests/input/test_2.json", 'r', encoding='utf-8') as f:
         query = json.load(f)

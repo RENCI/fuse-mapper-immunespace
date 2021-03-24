@@ -33,11 +33,12 @@ json_headers = {
 
 # other endpoint tests, start with "test_"
 
+g_debug = False
 def test_mapping():
 
     if os.getenv('TEST_LIBRARY') == "1":
         pytest.skip("Only testing docker lib")
-
+        
     with open("tests/input/test_2.json", 'r', encoding='utf-8') as f:
         query = json.load(f)
 
@@ -48,12 +49,16 @@ def test_mapping():
     with open("tests/expected/test_2.json", 'r', encoding='utf-8') as f:
         expected = json.load(f)
 
-    mappings = json.dumps(mapping, ensure_ascii=False, indent=4, sort_keys=True)
+    mappings = json.dumps(mapping.json(), ensure_ascii=False, indent=4, sort_keys=True)
     expecteds = json.dumps(expected, ensure_ascii=False, indent=4, sort_keys=True)
 
     if(g_debug):
-        print("mapping:")
+        print()
+        print("--- mappings: ---")
         print(mappings)
+        print()
+        print("--- expecteds: ---")
+        print(expecteds)
 
     assert mappings == expecteds
 

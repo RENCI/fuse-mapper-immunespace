@@ -1,6 +1,7 @@
 import os
 import logging
 from pathlib import Path
+from fuse.mapper.ge.dispatcher import GetMapping
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

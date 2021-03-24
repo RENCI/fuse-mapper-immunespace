@@ -95,35 +95,9 @@ paths:
           application/json:
             schema:
               description: "Send in array of data"
-              type: object
-              required:
-                - objectIds
-                - data
-              properties:
-                txid:
-                  type: string
-                timeout:
-                  type: integer
-                  description: "Number of milliseconds until time out. Factory system default should be 120000 (2 minutes)."
-                objectIds:
-                  description: "Map these object ids from the digital object server"
-                  example: [38]
-                  type: array
-                  items:
-                    type: string
-                data:
-                  description: "An array of digital objects, one per object id."
-                  anyOf:
-                    - type: array
-                      items:
-                        $ref: "#/components/schemas/Bundle"
-                    - type: object
-                timestamp:
-                  type: string
-                  format: date-time
-                settingsRequested:
-                  description: "If absent, all variables will be mapped and returned."
-                  $ref: "#/components/schemas/Settings"
+              type: array
+              items:
+                $ref: '#/components/schemas/Object'
       responses:
         '200':
           description: Successful operation
@@ -318,6 +292,50 @@ components:
             'm'=Mapper, 's'=Server, 'mD'=Default Mapper, 'sD'=Default Server
         settingsDefaults:
           $ref: '#/components/schemas/Settings'
+    Object:
+      type: object
+      properties:
+        apikey:
+          type: string
+          example: 38
+        id:
+          type: string
+          example: 38
+        resourceType:
+          type: string
+          example: "eset"
+        resource:
+          type: object
+          properties:
+            experimentData:
+              type: object
+              description: >-
+                May contain information such as the following: "Experimenter name", "Laboratory", "Contact information", "Title", "URL", "PMIDs", "notes"; and the "notes" may contain fields such as the following: "normalization", "summarizeBy", "org.Hs.eg.db_version", "featureAnnotationSet".
+            exprs:
+              type: object
+              description: >-
+                Comma-delimited lines, features (genes) on the rows, samples/aliquots on the columns.
+            featureNames:
+              type: object
+              description: >-
+                Names of the features (genes) in exprs. 
+            pData:
+              type: object
+              description: >-
+                Comma-delimited lines, samples on rows, covariates on columns; First row is covariate names
+            phenoMetadata:
+              type: object
+              description: >-
+                May contain descriptions for the covariate names in the pdata
+            system:
+              type: string
+              enum:
+                - HUGO
+                - HGNC
+                - NCBI
+                - Ensembl
+              description: >-
+                Immunescape standardizes across studies using HUGO gene symbols; should always be "HUGO"
     Settings:
       type: object
       description: >-

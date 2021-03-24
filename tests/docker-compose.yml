@@ -5,11 +5,8 @@ services:
     build:
       context: .
       dockerfile: tests/Dockerfile
+    environment:
+      TEST_LIBRARY: $TEST_LIBRARY
     command: ["-s", "-vv", "-x"] 
     depends_on:
       - fuse-mapper-immunespace
-
-
-
-    
-    
