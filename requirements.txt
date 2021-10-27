@@ -1,6 +1,0 @@
-flask==1.1.2
-greenlet==0.4.16
-gevent==1.4.0
-gunicorn[gevent]==19.9.0
-connexion[swagger-ui]==2.7.0
-docker==4.4.4
