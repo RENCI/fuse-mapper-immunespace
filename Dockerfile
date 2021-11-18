@@ -1,10 +1,6 @@
-# syntax = edrevo/dockerfile-plus
-
-FROM python:3.8-buster
-
-INCLUDE+ Dockerfile.common
-
-ENTRYPOINT ["gunicorn"]
-
-CMD ["-w", "4", "-b", "0.0.0.0:8080", "api.server:create_app()", "-t", "100000"]
-
+FROM rust:1.56-buster
+USER root
+RUN apt-get update && apt-get install -y bash curl coreutils libc-dev libssl-dev openssl
+RUN cargo install --git https://github.com/jdr0887/immunespace-to-cellfie-mapper.git
+CMD [ "/bin/bash" ]
+ENTRYPOINT ["immunespace-to-cellfie-mapper"]
